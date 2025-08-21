@@ -1,0 +1,176 @@
+{
+    "version": "2.0.0",
+    "options": {
+        "env": {
+            "PYTHONUTF8": "1"
+        }
+    },
+    "tasks": [
+        {
+            "label": "Setup: Complete Project",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Setup: Game Environment",
+                "Setup: API Environment",
+                "Setup: Database"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Setup: Game Environment",
+            "type": "shell",
+            "osx": {
+                "command": "python3 -m venv src/game/.venv & source src/game/.venv/bin/activate && pip install -U pip && pip install -r src/game/requirements.txt"
+            },
+            "linux": {
+                "command": "python3 -m venv src/game/.venv && source src/game/.venv/bin/activate && pip install -U pip && pip install -r src/game/requirements.txt"
+            },
+            "windows": {
+                "command": "if (!(Test-Path src/game/.venv)) { python -m venv src/game/.venv }; .\\src\\game\\.venv\\Scripts\\Activate.ps1; pip install -U pip; pip install -r src/game/requirements.txt"
+            },
+            "problemMatcher": []
+        },
+        {
+            
+            "label": "Setup: API Environment",
+            "type": "shell",
+            "osx": {
+                "command": "python3 -m venv src/api/.venv && source src/api/.venv/bin/activate && pip install -U pip && pip install -r src/api/requirements.txt"
+            },
+            "linux": {
+                "command": "python3 -m venv src/api/.venv && source src/api/.venv/bin/activate && pip install -U pip && pip install -r src/api/requirements.txt"
+            },
+            "windows": {
+                "command": "if (!(Test-Path src/api/.venv)) { python -m venv src/api/.venv }; .\\src\\api\\.venv\\Scripts\\Activate.ps1; pip install -U pip; pip install -r src/api/requirements.txt"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Setup: Database",
+            "type": "shell",
+            "command": "docker compose up -d",
+            "problemMatcher": [],
+            "dependsOn": [
+                "Docker: Ensure Running"
+            ],
+            "detail": "Starts PostgreSQL and waits for healthy state"
+        },
+        {
+            "label": "Docker: Ensure Running",
+            "type": "shell",
+            "command": "docker info | Out-Null; if ($LASTEXITCODE -ne 0) { Write-Error 'Docker is not running. Start Docker Desktop and re-run.'; exit 1 }"
+        },
+        {
+            "label": "Run: Game",
+            "type": "shell",
+            "osx": {
+                "command": "source src/game/.venv/bin/activate && python src/game/main.py"
+            },
+            "linux": {
+                "command": "source src/game/.venv/bin/activate && python src/game/main.py"
+            },
+            "windows": {
+                "command": ".\\src\\game\\.venv\\Scripts\\Activate.ps1; python src/game/main.py"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Run: API Development",
+            "type": "shell",
+            "osx": {
+                "command": "source src/api/.venv/bin/activate && uvicorn src.api.main:app --reload --port 8000"
+            },
+            "linux": {
+                "command": "source src/api/.venv/bin/activate && uvicorn src.api.main:app --reload --port 8000"
+            },
+            "windows": {
+                "command": ".\\src\\api\\.venv\\Scripts\\Activate.ps1; uvicorn src.api.main:app --reload --port 8000"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}"
+                }
+            }
+        },
+        {
+            "label": "Run: API Production",
+            "type": "shell",
+            "osx": {
+                "command": "source src/api/.venv/bin/activate && uvicorn src.api.main:app --host 0.0.0.0 --port 8000"
+            },
+            "linux": {
+                "command": "source src/api/.venv/bin/activate && uvicorn src.api.main:app --host 0.0.0.0 --port 8000"
+            },
+            "windows": {
+                "command": ".\\src\\api\\.venv\\Scripts\\Activate.ps1; uvicorn src.api.main:app --host 0.0.0.0 --port 8000"
+            }
+        },
+        {
+            "label": "Database: Start",
+            "type": "shell",
+            "command": "docker compose up -d"
+        },
+        {
+            "label": "Database: Stop",
+            "type": "shell",
+            "command": "docker compose stop"
+        },
+        {
+            "label": "Database: Reset",
+            "type": "shell",
+            "command": "docker compose down -v && docker compose up -d"
+        },
+        {
+            "label": "Test: Game",
+            "type": "shell",
+            "osx": {
+                "command": "source src/game/.venv/bin/activate && pytest tests/test_game -q"
+            },
+            "linux": {
+                "command": "source src/game/.venv/bin/activate && pytest tests/test_game -q"
+            },
+            "windows": {
+                "command": ".\\src\\game\\.venv\\Scripts\\Activate.ps1; pytest tests/test_game -q"
+            },
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}"
+                }
+            }
+        },
+        {
+            "label": "Test: API",
+            "type": "shell",
+            "osx": {
+                "command": "source src/api/.venv/bin/activate && pytest tests/test_api -q"
+            },
+            "linux": {
+                "command": "source src/api/.venv/bin/activate && pytest tests/test_api -q"
+            },
+            "windows": {
+                "command": ".\\src\\api\\.venv\\Scripts\\Activate.ps1; pytest tests/test_api -q"
+            },
+            "options": {
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}"
+                }
+            }
+        },
+        {
+            "label": "Clean: All",
+            "type": "shell",
+            "osx": {
+                "command": "rm -rf src/game/.venv src/api/.venv && find . -type d -name '__pycache__' -exec rm -rf {} + && docker compose down -v"
+            },
+            "linux": {
+                "command": "rm -rf src/game/.venv src/api/.venv && find . -type d -name '__pycache__' -exec rm -rf {} + && docker compose down -v"
+            },
+            "windows": {
+                "command": "if (Test-Path src/game/.venv) { Remove-Item -Recurse -Force src/game/.venv }; if (Test-Path src/api/.venv) { Remove-Item -Recurse -Force src/api/.venv }; Get-ChildItem -Recurse -Directory -Filter __pycache__ | Remove-Item -Recurse -Force; docker compose down -v"
+            }
+        }
+    ]
+}
