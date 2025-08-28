@@ -31,7 +31,6 @@
             "problemMatcher": []
         },
         {
-            
             "label": "Setup: API Environment",
             "type": "shell",
             "osx": {
@@ -93,7 +92,8 @@
                 "env": {
                     "PYTHONPATH": "${workspaceFolder}"
                 }
-            }
+            },
+            "problemMatcher": []
         },
         {
             "label": "Run: API Production",
