@@ -38,7 +38,18 @@ async def register(credentials: UserCredentials, db: Session = Depends(get_db)) 
 @router.post("/login", status_code=status.HTTP_200_OK)
 async def login(credentials: UserCredentials) -> Dict[str, str]:
     """Login a user"""
-    return {"message": f"User {credentials.username} logged in successfully"}
+    if not credentials.username:
+        raise HTTPException(status_code=400, detail="Username is required")
+
+    db_gen = get_db()
+    db = next(db_gen)
+    try:
+        user = db.query(User).filter(User.username == credentials.username).first()
+        if not user or not pwd_context.verify(credentials.password, user.password_hash):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        return {"message": f"User {user.username} logged in successfully"}
+    finally:
+        db_gen.close()
 
 @router.delete("/profile/{username}", status_code=status.HTTP_200_OK)
 async def delete_profile(username: str) -> Dict[str, str]:
