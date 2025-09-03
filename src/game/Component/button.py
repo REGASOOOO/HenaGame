@@ -102,7 +102,13 @@ class Button:
                 self._trigger(visual_feedback=True)
 
     def update(self) -> None:
-        pass  # Placeholder if you later need animations
+        new_state = (self._hover, self._pressed)
+        if not hasattr(self, "_last_state"):
+            self._last_state = new_state
+            self._dirty = True
+        elif new_state != self._last_state:
+            self._last_state = new_state
+            self._dirty = True
 
     def draw(self, target_surface: pygame.Surface) -> None:
         if self._dirty:

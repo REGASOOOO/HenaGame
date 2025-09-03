@@ -5,3 +5,4 @@ pygame-gui>=0.6.9
 numpy>=2.1.0
 pillow>=11.0.0
 pytest>=8.2.0
+requests>=2.32.5
